@@ -1,5 +1,3 @@
-// User Authentication
-
 const express = require("express");
 const {
   registerUser,
