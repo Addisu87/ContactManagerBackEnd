@@ -21,7 +21,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
-  console.log("Hash password: ", hashedPassword);
+  console.log("Hashed password: ", hashedPassword);
 
   // Create new user
   const user = await User.create({
@@ -33,7 +33,7 @@ const registerUser = asyncHandler(async (req, res) => {
   console.log(`User created: ${user}`);
 
   if (user) {
-    res.status(201).json({ _id: user.id, email: user.email });
+    res.status(201).json({ id: user.id, email: user.email });
   } else {
     res.status(400);
     throw new Error("User not created!");
@@ -51,19 +51,20 @@ const loginUser = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("All fields are mandatory!");
   }
+  // Check user is already login
   const user = await User.findOne({ email });
   // compare password with hashedpassword
   if (user && (await bcrypt.compare(password, user.password))) {
     const accessToken = jwt.sign(
       {
         user: {
-          _id: user._id,
+          id: user.id,
           email: user.email,
           username: user.username,
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "1m" }
+      { expiresIn: "20m" }
     );
     res.status(200).json({ accessToken });
   } else {
@@ -76,7 +77,7 @@ const loginUser = asyncHandler(async (req, res) => {
 //@route GET /api/users/current
 //@access private
 const currentUser = asyncHandler(async (req, res) => {
-  res.json({ message: "Current user information" });
+  res.json(req.user);
 });
 
 module.exports = { registerUser, loginUser, currentUser };
